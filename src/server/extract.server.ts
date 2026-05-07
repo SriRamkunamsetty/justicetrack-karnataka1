@@ -265,28 +265,3 @@ export async function persistExtraction(
     },
   });
 }
-      result.directives.map((d) => ({
-        case_id: caseId,
-        text: d.text,
-        department: d.department,
-        deadline: d.deadline,
-        priority: d.priority,
-        source_page: d.source_page,
-        source_quote: d.source_quote,
-      })),
-    );
-  }
-
-  await supabaseAdmin.from("audit_logs").insert({
-    case_id: caseId,
-    actor_id: actorId,
-    actor_name: "JusticeTrack AI",
-    actor_role: "system",
-    action: "Extraction completed",
-    details: {
-      avg_confidence: avgConf,
-      field_count: result.fields.length,
-      directive_count: result.directives.length,
-    },
-  });
-}
