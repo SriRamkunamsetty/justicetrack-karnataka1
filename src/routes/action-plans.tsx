@@ -1,15 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GovLayout } from "@/components/GovLayout";
-import { cases } from "@/lib/mockData";
-import { PriorityPill } from "./index";
+import { useDirectives, fmtDate, daysBetween } from "@/lib/queries";
+import { PriorityPill } from "@/components/Pills";
 import { Calendar, Building2, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/action-plans")({ component: ActionPlans });
 
 function ActionPlans() {
-  const all = cases.flatMap((c) =>
-    c.directives.map((d) => ({ ...d, caseNumber: c.caseNumber, caseId: c.id })),
-  );
+  const { data: directives = [], isLoading } = useDirectives();
 
   return (
     <GovLayout>
@@ -23,18 +21,24 @@ function ActionPlans() {
           appeal/compliance window and is published only after legal officer verification.
         </p>
 
+        {isLoading && <div className="mt-6 text-sm text-muted-foreground">Loading directives…</div>}
+        {!isLoading && directives.length === 0 && (
+          <div className="mt-6 official-card p-8 text-center text-sm text-muted-foreground">
+            No action plans yet. Upload a judgment to generate directives.
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-6">
-          {all.map((d) => {
-            const urgent = d.daysRemaining <= 7;
+          {directives.map((d) => {
+            const days = daysBetween(d.deadline);
+            const urgent = days != null && days <= 7;
             return (
               <div
-                key={d.caseId + d.id}
-                className={`official-card p-5 border-t-4 ${
-                  urgent ? "border-t-[var(--gov-red)]" : "border-t-[var(--gov-blue)]"
-                }`}
+                key={d.id}
+                className={`official-card p-5 border-t-4 ${urgent ? "border-t-[var(--gov-red)]" : "border-t-[var(--gov-blue)]"}`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="font-mono text-xs text-[var(--gov-blue)]">{d.caseNumber}</div>
+                  <div className="font-mono text-xs text-[var(--gov-blue)]">{d.cases?.case_number ?? "—"}</div>
                   <PriorityPill priority={d.priority} />
                 </div>
                 <div className="font-serif text-base text-[var(--gov-blue-deep)] font-semibold mt-2 leading-snug">
@@ -42,41 +46,25 @@ function ActionPlans() {
                 </div>
                 <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <div className="ribbon-label flex items-center gap-1">
-                      <Calendar className="h-3 w-3" /> Deadline
-                    </div>
-                    <div className="font-semibold text-foreground mt-0.5">{d.deadline}</div>
+                    <div className="ribbon-label flex items-center gap-1"><Calendar className="h-3 w-3" /> Deadline</div>
+                    <div className="font-semibold text-foreground mt-0.5">{fmtDate(d.deadline)}</div>
                   </div>
                   <div>
-                    <div className="ribbon-label flex items-center gap-1">
-                      <AlertTriangle className="h-3 w-3" /> Window
-                    </div>
-                    <div
-                      className={`font-semibold mt-0.5 ${
-                        urgent ? "text-[var(--gov-red)]" : "text-foreground"
-                      }`}
-                    >
-                      {d.daysRemaining} days remaining
+                    <div className="ribbon-label flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Window</div>
+                    <div className={`font-semibold mt-0.5 ${urgent ? "text-[var(--gov-red)]" : "text-foreground"}`}>
+                      {days != null ? `${days} days remaining` : "Not specified"}
                     </div>
                   </div>
                   <div className="col-span-2">
-                    <div className="ribbon-label flex items-center gap-1">
-                      <Building2 className="h-3 w-3" /> Assigned Department
-                    </div>
-                    <div className="font-semibold text-foreground mt-0.5">{d.department}</div>
+                    <div className="ribbon-label flex items-center gap-1"><Building2 className="h-3 w-3" /> Assigned Department</div>
+                    <div className="font-semibold text-foreground mt-0.5">{d.department ?? "Unassigned"}</div>
                   </div>
                 </div>
-                <div className="mt-4 flex items-center gap-2">
-                  <button className="text-xs font-semibold px-3 h-8 rounded bg-[var(--gov-blue)] text-white">
-                    Acknowledge
-                  </button>
-                  <button className="text-xs font-semibold px-3 h-8 rounded border border-border">
-                    Reassign
-                  </button>
-                  <button className="text-xs font-semibold px-3 h-8 rounded border border-border">
-                    Mark complete
-                  </button>
-                </div>
+                {d.source_quote && (
+                  <div className="mt-3 text-[11px] italic text-muted-foreground border-l-2 border-border pl-2 line-clamp-3">
+                    “{d.source_quote}” {d.source_page ? `(p.${d.source_page})` : ""}
+                  </div>
+                )}
               </div>
             );
           })}
