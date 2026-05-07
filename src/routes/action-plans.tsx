@@ -2,12 +2,34 @@ import { createFileRoute } from "@tanstack/react-router";
 import { GovLayout } from "@/components/GovLayout";
 import { useDirectives, fmtDate, daysBetween } from "@/lib/queries";
 import { PriorityPill } from "@/components/Pills";
-import { Calendar, Building2, AlertTriangle } from "lucide-react";
+import { Calendar, Building2, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useAuth } from "@/lib/auth";
+import { useQueryClient } from "@tanstack/react-query";
+import { acknowledgeDirective } from "@/server/extract.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/action-plans")({ component: ActionPlans });
 
 function ActionPlans() {
   const { data: directives = [], isLoading } = useDirectives();
+  const { canWrite } = useAuth();
+  const qc = useQueryClient();
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const onAck = async (id: string) => {
+    if (!canWrite) return toast.error("You don't have permission.");
+    setBusy(id);
+    try {
+      await acknowledgeDirective({ data: { directiveId: id } });
+      toast.success("Directive acknowledged");
+      await qc.invalidateQueries({ queryKey: ["directives"] });
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setBusy(null);
+    }
+  };
 
   return (
     <GovLayout>
@@ -29,13 +51,14 @@ function ActionPlans() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-6">
-          {directives.map((d) => {
+          {directives.map((d: any) => {
             const days = daysBetween(d.deadline);
             const urgent = days != null && days <= 7;
+            const acknowledged = d.status === "acknowledged" || d.acknowledged_at;
             return (
               <div
                 key={d.id}
-                className={`official-card p-5 border-t-4 ${urgent ? "border-t-[var(--gov-red)]" : "border-t-[var(--gov-blue)]"}`}
+                className={`official-card p-5 border-t-4 ${urgent ? "border-t-[var(--gov-red)]" : "border-t-[var(--gov-blue)]"} ${acknowledged ? "opacity-90" : ""}`}
               >
                 <div className="flex items-center justify-between">
                   <div className="font-mono text-xs text-[var(--gov-blue)]">{d.cases?.case_number ?? "—"}</div>
@@ -65,6 +88,25 @@ function ActionPlans() {
                     “{d.source_quote}” {d.source_page ? `(p.${d.source_page})` : ""}
                   </div>
                 )}
+                <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
+                  {acknowledged ? (
+                    <span className="text-xs text-success font-semibold inline-flex items-center gap-1.5">
+                      <CheckCircle2 className="h-3.5 w-3.5" /> Acknowledged by department
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Pending acknowledgement</span>
+                  )}
+                  {!acknowledged && (
+                    <button
+                      disabled={!canWrite || busy === d.id}
+                      onClick={() => onAck(d.id)}
+                      className="text-xs px-3 h-8 rounded bg-[var(--gov-blue)] text-white font-semibold disabled:opacity-50 inline-flex items-center gap-1.5"
+                    >
+                      {busy === d.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
+                      Acknowledge
+                    </button>
+                  )}
+                </div>
               </div>
             );
           })}
