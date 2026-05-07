@@ -172,6 +172,7 @@ export type Database = {
           priority: Database["public"]["Enums"]["priority_level"]
           source_page: number | null
           source_quote: string | null
+          status: string
           text: string
         }
         Insert: {
@@ -185,6 +186,7 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_level"]
           source_page?: number | null
           source_quote?: string | null
+          status?: string
           text: string
         }
         Update: {
@@ -198,6 +200,7 @@ export type Database = {
           priority?: Database["public"]["Enums"]["priority_level"]
           source_page?: number | null
           source_quote?: string | null
+          status?: string
           text?: string
         }
         Relationships: [
@@ -221,6 +224,7 @@ export type Database = {
           edited_value: string | null
           id: string
           label: string
+          rejection_reason: string | null
           source_page: number | null
           source_quote: string | null
           value: string | null
@@ -235,6 +239,7 @@ export type Database = {
           edited_value?: string | null
           id?: string
           label: string
+          rejection_reason?: string | null
           source_page?: number | null
           source_quote?: string | null
           value?: string | null
@@ -249,6 +254,7 @@ export type Database = {
           edited_value?: string | null
           id?: string
           label?: string
+          rejection_reason?: string | null
           source_page?: number | null
           source_quote?: string | null
           value?: string | null

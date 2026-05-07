@@ -46,6 +46,7 @@ export const decideField = createServerFn({ method: "POST" })
       .update({
         decision: data.decision,
         edited_value: data.decision === "edited" ? data.editedValue ?? null : null,
+        rejection_reason: data.decision === "rejected" ? data.reason ?? null : null,
         decided_by: userId,
         decided_at: new Date().toISOString(),
       })
@@ -118,3 +119,38 @@ export const getSignedPdfUrl = createServerFn({ method: "POST" })
     if (error || !signed) throw new Error(error?.message ?? "Could not sign URL");
     return { url: signed.signedUrl };
   });
+
+export const acknowledgeDirective = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ directiveId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: dir, error } = await supabase
+      .from("directives")
+      .update({
+        status: "acknowledged",
+        acknowledged_by: userId,
+        acknowledged_at: new Date().toISOString(),
+      })
+      .eq("id", data.directiveId)
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, designation")
+      .eq("id", userId)
+      .maybeSingle();
+
+    await supabase.from("audit_logs").insert({
+      case_id: dir.case_id,
+      actor_id: userId,
+      actor_name: profile?.full_name ?? "Officer",
+      actor_role: profile?.designation ?? "Department Officer",
+      action: `Directive acknowledged: ${dir.text.slice(0, 80)}`,
+      details: { directive_id: dir.id, department: dir.department },
+    });
+    return { ok: true };
+  });
+

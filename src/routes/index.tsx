@@ -2,6 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { GovLayout } from "@/components/GovLayout";
 import { StatusPill, PriorityPill } from "@/components/Pills";
 import { useCases } from "@/lib/queries";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -38,6 +41,17 @@ function Stat({
 
 function Dashboard() {
   const { data: cases = [], isLoading } = useCases();
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    const ch = supabase
+      .channel("dashboard-cases")
+      .on("postgres_changes", { event: "*", schema: "public", table: "cases" }, () => {
+        qc.invalidateQueries({ queryKey: ["cases"] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [qc]);
 
   const pending = cases.filter((c) => c.status === "pending").length;
   const inReview = cases.filter((c) => c.status === "in_review").length;
