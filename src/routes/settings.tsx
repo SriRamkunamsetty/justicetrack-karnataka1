@@ -5,6 +5,7 @@ import { useState, FormEvent, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck, KeyRound, User as UserIcon } from "lucide-react";
+import { KARNATAKA_DEPARTMENTS, KARNATAKA_DISTRICTS } from "@/lib/karnataka";
 
 export const Route = createFileRoute("/settings")({ component: SettingsPage });
 
@@ -13,6 +14,7 @@ function SettingsPage() {
   const [fullName, setFullName] = useState("");
   const [designation, setDesignation] = useState("");
   const [department, setDepartment] = useState("");
+  const [district, setDistrict] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
 
   const [newPwd, setNewPwd] = useState("");
