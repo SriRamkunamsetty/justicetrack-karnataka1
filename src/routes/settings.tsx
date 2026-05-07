@@ -25,6 +25,7 @@ function SettingsPage() {
     setFullName(profile?.full_name ?? "");
     setDesignation(profile?.designation ?? "");
     setDepartment(profile?.department ?? "");
+    setDistrict((profile as any)?.district ?? "");
   }, [profile]);
 
   const saveProfile = async (e: FormEvent) => {
@@ -34,10 +35,10 @@ function SettingsPage() {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ full_name: fullName, designation, department })
+        .update({ full_name: fullName, designation, department, district })
         .eq("id", user.id);
       if (error) throw error;
-      toast.success("Profile updated");
+      toast.success("Profile updated · navbar synced");
       await refresh();
     } catch (e: any) {
       toast.error(e.message);
