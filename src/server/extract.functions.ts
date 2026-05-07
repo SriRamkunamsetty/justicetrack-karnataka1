@@ -1,8 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { extractPdfText, callGemini, persistExtraction } from "./extract.server";
+import {
+  extractPdfText,
+  callGemini,
+  persistExtraction,
+  setCaseExtracting,
+  downloadJudgmentPdf,
+  signJudgmentUrl,
+} from "./extract.server";
 
 export const runExtraction = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -11,14 +17,8 @@ export const runExtraction = createServerFn({ method: "POST" })
     const { caseId, pdfPath } = data;
     const userId = context.userId;
 
-    await supabaseAdmin.from("cases").update({ status: "extracting" }).eq("id", caseId);
-
-    const { data: file, error: dlErr } = await supabaseAdmin.storage
-      .from("judgments")
-      .download(pdfPath);
-    if (dlErr || !file) throw new Error(`Download failed: ${dlErr?.message ?? "no file"}`);
-
-    const bytes = new Uint8Array(await file.arrayBuffer());
+    await setCaseExtracting(caseId);
+    const bytes = await downloadJudgmentPdf(pdfPath);
     const { text, pages } = await extractPdfText(bytes);
 
     const result = await callGemini(text);
@@ -113,11 +113,8 @@ export const getSignedPdfUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ pdfPath: z.string() }).parse(d))
   .handler(async ({ data }) => {
-    const { data: signed, error } = await supabaseAdmin.storage
-      .from("judgments")
-      .createSignedUrl(data.pdfPath, 60 * 60);
-    if (error || !signed) throw new Error(error?.message ?? "Could not sign URL");
-    return { url: signed.signedUrl };
+    const url = await signJudgmentUrl(data.pdfPath);
+    return { url };
   });
 
 export const acknowledgeDirective = createServerFn({ method: "POST" })

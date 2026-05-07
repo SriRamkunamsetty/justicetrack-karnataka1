@@ -2,6 +2,22 @@
 import { extractText } from "unpdf";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
+export async function setCaseExtracting(caseId: string) {
+  await supabaseAdmin.from("cases").update({ status: "extracting" }).eq("id", caseId);
+}
+
+export async function downloadJudgmentPdf(pdfPath: string): Promise<Uint8Array> {
+  const { data: file, error } = await supabaseAdmin.storage.from("judgments").download(pdfPath);
+  if (error || !file) throw new Error(`Download failed: ${error?.message ?? "no file"}`);
+  return new Uint8Array(await file.arrayBuffer());
+}
+
+export async function signJudgmentUrl(pdfPath: string, expiresInSeconds = 3600): Promise<string> {
+  const { data, error } = await supabaseAdmin.storage.from("judgments").createSignedUrl(pdfPath, expiresInSeconds);
+  if (error || !data) throw new Error(error?.message ?? "Could not sign URL");
+  return data.signedUrl;
+}
+
 export type ExtractionResult = {
   case_number: string | null;
   title: string | null;
