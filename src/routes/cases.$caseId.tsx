@@ -66,7 +66,7 @@ function CaseDetail() {
             <div className="official-card p-5">
               <div className="ribbon-label mb-3">Compliance Directives</div>
               <ul className="space-y-3">
-                {c.directives.map((d) => (
+                {c.directives.map((d: any) => (
                   <li key={d.id} className="border-l-4 border-[var(--gov-red)] pl-3 py-1">
                     <div className="font-semibold text-sm">{d.text}</div>
                     <div className="text-xs text-muted-foreground mt-0.5">

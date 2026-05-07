@@ -98,7 +98,7 @@ function VerificationWorkspace() {
                   Certified true copy
                 </div>
               </div>
-              {c.judgmentLines.map((line) => {
+              {c.judgmentLines.map((line: any) => {
                 const isActive = activeLine === line.id;
                 return (
                   <div
@@ -126,7 +126,7 @@ function VerificationWorkspace() {
             <div className="official-card p-4">
               <div className="ribbon-label mb-2">Extracted Fields · Click to verify source</div>
               <div className="space-y-2">
-                {c.fields.map((f) => {
+                {c.fields.map((f: any) => {
                   const decision = decisions[f.id];
                   const confColor =
                     f.confidence >= 0.95 ? "text-success" : f.confidence >= 0.85 ? "text-[var(--warning)]" : "text-[var(--gov-red)]";
@@ -201,7 +201,7 @@ function VerificationWorkspace() {
 
             <div className="official-card p-4">
               <div className="ribbon-label mb-2">Generated Action Plan (advisory)</div>
-              {c.directives.map((d) => (
+              {c.directives.map((d: any) => (
                 <div
                   key={d.id}
                   onClick={() => setActiveLine(d.sourceLineId)}
