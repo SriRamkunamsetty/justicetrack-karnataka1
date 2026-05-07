@@ -112,12 +112,29 @@ function SettingsPage() {
               </div>
               <div>
                 <label className="ribbon-label">Department</label>
-                <input
+                <select
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
-                  placeholder="e.g. Revenue Department"
                   className="w-full mt-1 h-10 px-3 border border-border rounded bg-background text-sm"
-                />
+                >
+                  <option value="">— Select department —</option>
+                  {KARNATAKA_DEPARTMENTS.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="ribbon-label">District</label>
+                <select
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                  className="w-full mt-1 h-10 px-3 border border-border rounded bg-background text-sm"
+                >
+                  <option value="">— Select district —</option>
+                  {KARNATAKA_DISTRICTS.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
               </div>
             </div>
             <div className="mt-4 flex justify-end">
