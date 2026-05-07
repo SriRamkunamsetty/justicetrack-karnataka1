@@ -70,20 +70,13 @@ function AuthPage() {
     <div className="min-h-screen grid lg:grid-cols-2 bg-[var(--sandal)]">
       {/* Left identity panel */}
       <div className="hidden lg:flex flex-col p-10 xl:p-12 bg-[var(--gov-blue-deep)] text-white relative overflow-hidden">
-        <div className="flex items-start gap-4">
-          <img
-            src={emblem}
-            alt="Government of Karnataka emblem"
-            className="h-16 w-16 object-contain shrink-0 drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]"
-          />
-          <div>
-            <div className="text-[11px] tracking-[0.22em] uppercase opacity-85">
-              ಕರ್ನಾಟಕ ಸರ್ಕಾರ · Government of Karnataka
-            </div>
-            <div className="font-serif text-3xl mt-1 font-semibold">JusticeTrack</div>
-            <div className="text-xs opacity-80 mt-0.5">
-              Court Case Monitoring System · DPAR
-            </div>
+        <div>
+          <div className="text-[11px] tracking-[0.22em] uppercase opacity-85">
+            ಕರ್ನಾಟಕ ಸರ್ಕಾರ · Government of Karnataka
+          </div>
+          <div className="font-serif text-3xl mt-1 font-semibold">JusticeTrack</div>
+          <div className="text-xs opacity-80 mt-0.5">
+            Court Case Monitoring System · DPAR
           </div>
         </div>
 

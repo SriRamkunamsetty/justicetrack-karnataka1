@@ -80,9 +80,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     hasRole: (r) => roles.includes(r),
     hasAnyRole: (rs) => rs.some((r) => roles.includes(r)),
-    canWrite: roles.some((r) =>
-      ["super_admin", "legal_officer", "reviewing_officer", "department_admin"].includes(r),
-    ),
+    canWrite: !!session?.user,
+
   };
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
