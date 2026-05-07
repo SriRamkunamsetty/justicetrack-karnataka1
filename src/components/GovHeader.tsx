@@ -93,7 +93,7 @@ export function GovHeader() {
                 <div className="hidden md:block leading-tight text-right">
                   <div className="text-sm font-semibold">{name}</div>
                   <div className="text-[11px] text-muted-foreground">
-                    {role} · {dept}
+                    {role} · {dept}{district ? ` · ${district}` : ""}
                   </div>
                 </div>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
