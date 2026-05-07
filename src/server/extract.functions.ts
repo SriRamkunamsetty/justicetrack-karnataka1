@@ -46,6 +46,7 @@ export const decideField = createServerFn({ method: "POST" })
       .update({
         decision: data.decision,
         edited_value: data.decision === "edited" ? data.editedValue ?? null : null,
+        rejection_reason: data.decision === "rejected" ? data.reason ?? null : null,
         decided_by: userId,
         decided_at: new Date().toISOString(),
       })
