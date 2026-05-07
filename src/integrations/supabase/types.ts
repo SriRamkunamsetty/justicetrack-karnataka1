@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      action_plans: {
+        Row: {
+          action_text: string
+          assigned_to: string | null
+          case_id: string
+          created_at: string
+          created_by: string | null
+          department: string | null
+          directive_id: string | null
+          due_date: string | null
+          id: string
+          priority: Database["public"]["Enums"]["priority_level"]
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          action_text: string
+          assigned_to?: string | null
+          case_id: string
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          directive_id?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["priority_level"]
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          action_text?: string
+          assigned_to?: string | null
+          case_id?: string
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          directive_id?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["priority_level"]
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -334,6 +379,48 @@ export type Database = {
         }
         Relationships: []
       }
+      uploads: {
+        Row: {
+          case_id: string | null
+          content_type: string | null
+          created_at: string
+          error_message: string | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          status: string
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          case_id?: string | null
+          content_type?: string | null
+          created_at?: string
+          error_message?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          status?: string
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          case_id?: string | null
+          content_type?: string | null
+          created_at?: string
+          error_message?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          status?: string
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -352,6 +439,42 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      workflow_assignments: {
+        Row: {
+          assigned_role: Database["public"]["Enums"]["app_role"]
+          assigned_to: string | null
+          case_id: string
+          created_at: string
+          created_by: string | null
+          department: string | null
+          id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_role?: Database["public"]["Enums"]["app_role"]
+          assigned_to?: string | null
+          case_id: string
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_role?: Database["public"]["Enums"]["app_role"]
+          assigned_to?: string | null
+          case_id?: string
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          id?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }

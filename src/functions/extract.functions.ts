@@ -6,6 +6,7 @@ import {
   callGemini,
   persistExtraction,
   setCaseExtracting,
+  markExtractionFailed,
   downloadJudgmentPdf,
   signJudgmentUrl,
 } from "@/server/extract.server";
@@ -15,16 +16,34 @@ export const runExtraction = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ caseId: z.string().uuid(), pdfPath: z.string() }).parse(d))
   .handler(async ({ data, context }) => {
     const { caseId, pdfPath } = data;
-    const userId = context.userId;
+    const { supabase, userId } = context;
+
+    const { data: caseRow, error: caseError } = await supabase
+      .from("cases")
+      .select("id, pdf_path, uploaded_by")
+      .eq("id", caseId)
+      .eq("uploaded_by", userId)
+      .maybeSingle();
+
+    if (caseError) throw new Error("Upload authorization failed. Please sign in again and retry.");
+    if (!caseRow || caseRow.pdf_path !== pdfPath) {
+      throw new Error("Upload authorization failed. This judgment is not linked to your session.");
+    }
 
     await setCaseExtracting(caseId);
-    const bytes = await downloadJudgmentPdf(pdfPath);
-    const { text, pages } = await extractPdfText(bytes);
+    try {
+      const bytes = await downloadJudgmentPdf(pdfPath);
+      const { text, pages } = await extractPdfText(bytes);
 
-    const result = await callGemini(text);
-    await persistExtraction(caseId, result, pages, text, userId);
+      const result = await callGemini(text);
+      await persistExtraction(caseId, result, pages, text, userId);
 
-    return { ok: true, caseId };
+      return { ok: true, caseId };
+    } catch (error: any) {
+      await supabase.from("uploads").update({ status: "extraction_failed", error_message: error?.message ?? "Extraction failed" }).eq("case_id", caseId);
+      await markExtractionFailed(caseId, userId, error?.message ?? "Extraction failed");
+      throw new Error(error?.message ?? "Unable to complete extraction workflow. Please retry.");
+    }
   });
 
 export const decideField = createServerFn({ method: "POST" })
@@ -41,6 +60,11 @@ export const decideField = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const { data: permitted } = await supabase.rpc("current_user_has_any_role", {
+      _roles: ["super_admin", "legal_officer", "reviewing_officer"],
+    });
+    if (!permitted) throw new Error("Verification authorization failed. Your role can upload and view, but cannot verify fields.");
+
     const { data: field, error } = await supabase
       .from("extracted_fields")
       .update({
@@ -83,6 +107,11 @@ export const publishCase = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ caseId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const { data: permitted } = await supabase.rpc("current_user_has_any_role", {
+      _roles: ["super_admin", "legal_officer"],
+    });
+    if (!permitted) throw new Error("Publication authorization failed. Only authorised legal officers can publish verified records.");
+
     const { error } = await supabase
       .from("cases")
       .update({
@@ -122,6 +151,11 @@ export const acknowledgeDirective = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ directiveId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const { data: permitted } = await supabase.rpc("current_user_has_any_role", {
+      _roles: ["super_admin", "legal_officer", "reviewing_officer", "department_admin"],
+    });
+    if (!permitted) throw new Error("Workflow authorization failed. Your role can upload and view, but cannot acknowledge directives.");
+
     const { data: dir, error } = await supabase
       .from("directives")
       .update({

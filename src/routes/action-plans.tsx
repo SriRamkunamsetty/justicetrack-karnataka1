@@ -13,12 +13,13 @@ export const Route = createFileRoute("/action-plans")({ component: ActionPlans }
 
 function ActionPlans() {
   const { data: directives = [], isLoading } = useDirectives();
-  const { canWrite } = useAuth();
+  const { hasAnyRole } = useAuth();
   const qc = useQueryClient();
   const [busy, setBusy] = useState<string | null>(null);
+  const canAcknowledge = hasAnyRole(["super_admin", "legal_officer", "reviewing_officer", "department_admin"]);
 
   const onAck = async (id: string) => {
-    if (!canWrite) return toast.error("You don't have permission.");
+    if (!canAcknowledge) return toast.error("Workflow authorization failed. Your role can upload and view, but cannot acknowledge directives.");
     setBusy(id);
     try {
       await acknowledgeDirective({ data: { directiveId: id } });
@@ -98,7 +99,7 @@ function ActionPlans() {
                   )}
                   {!acknowledged && (
                     <button
-                      disabled={!canWrite || busy === d.id}
+                      disabled={!canAcknowledge || busy === d.id}
                       onClick={() => onAck(d.id)}
                       className="text-xs px-3 h-8 rounded bg-[var(--gov-blue)] text-white font-semibold disabled:opacity-50 inline-flex items-center gap-1.5"
                     >

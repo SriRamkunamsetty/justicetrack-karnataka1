@@ -17,9 +17,11 @@ export const Route = createFileRoute("/verification/$caseId")({ component: Verif
 
 function VerificationWorkspace() {
   const { caseId } = Route.useParams();
-  const { canWrite } = useAuth();
+  const { hasAnyRole } = useAuth();
   const qc = useQueryClient();
   const { data, isLoading } = useCase(caseId);
+  const canVerify = hasAnyRole(["super_admin", "legal_officer", "reviewing_officer"]);
+  const canPublish = hasAnyRole(["super_admin", "legal_officer"]);
 
   const c = data?.case;
   const fields = data?.fields ?? [];
@@ -57,7 +59,7 @@ function VerificationWorkspace() {
   const refresh = () => qc.invalidateQueries({ queryKey: ["case", caseId] });
 
   const onApprove = async (fid: string) => {
-    if (!canWrite) return toast.error("You don't have permission.");
+    if (!canVerify) return toast.error("Verification authorization failed. Your role can upload and view, but cannot verify fields.");
     setBusy(fid);
     try {
       await decideField({ data: { fieldId: fid, decision: "approved" } });
@@ -71,7 +73,7 @@ function VerificationWorkspace() {
   };
 
   const onSaveEdit = async (fid: string) => {
-    if (!canWrite) return toast.error("You don't have permission.");
+    if (!canVerify) return toast.error("Verification authorization failed. Your role can upload and view, but cannot verify fields.");
     setBusy(fid);
     try {
       await decideField({ data: { fieldId: fid, decision: "edited", editedValue: editValue } });
@@ -102,7 +104,7 @@ function VerificationWorkspace() {
   };
 
   const onPublish = async () => {
-    if (!canWrite) return toast.error("You don't have permission.");
+    if (!canPublish) return toast.error("Publication authorization failed. Only authorised legal officers can publish verified records.");
     const undecided = fields.filter((f) => f.decision === "pending");
     if (undecided.length > 0) {
       if (!confirm(`${undecided.length} field(s) still pending. Publish anyway?`)) return;
@@ -164,7 +166,7 @@ function VerificationWorkspace() {
             </span>
             <button
               onClick={onPublish}
-              disabled={!canWrite || publishing || c.status === "verified"}
+              disabled={!canPublish || publishing || c.status === "verified"}
               className="bg-success text-white text-sm font-semibold px-4 h-10 rounded inline-flex items-center gap-1.5 disabled:opacity-50"
             >
               {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
@@ -349,7 +351,7 @@ function VerificationWorkspace() {
                         {!isEditing && !isRejecting && (
                           <div className="mt-2 flex items-center gap-1">
                             <button
-                              disabled={!canWrite || busy === f.id}
+                              disabled={!canVerify || busy === f.id}
                               onClick={(e) => { e.stopPropagation(); onApprove(f.id); }}
                               className={`text-xs px-2 h-7 rounded inline-flex items-center gap-1 border disabled:opacity-50 ${
                                 f.decision === "approved" ? "bg-success text-white border-success" : "border-border hover:bg-success/10"
@@ -358,7 +360,7 @@ function VerificationWorkspace() {
                               {busy === f.id && f.decision !== "approved" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />} Approve
                             </button>
                             <button
-                              disabled={!canWrite}
+                              disabled={!canVerify}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setEditingId(f.id);
@@ -371,7 +373,7 @@ function VerificationWorkspace() {
                               <Edit3 className="h-3 w-3" /> Edit
                             </button>
                             <button
-                              disabled={!canWrite}
+                              disabled={!canVerify}
                               onClick={(e) => { e.stopPropagation(); setRejectingId(f.id); }}
                               className={`text-xs px-2 h-7 rounded inline-flex items-center gap-1 border disabled:opacity-50 ${
                                 f.decision === "rejected" ? "bg-[var(--gov-red)] text-white border-[var(--gov-red)]" : "border-border hover:bg-[var(--gov-red)]/10"
