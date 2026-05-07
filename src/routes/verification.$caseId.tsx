@@ -8,7 +8,7 @@ import {
   ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Loader2, Save,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { decideField, publishCase, getSignedPdfUrl } from "@/server/extract.functions";
+import { decideField, publishCase, getSignedPdfUrl } from "@/functions/extract.functions";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
