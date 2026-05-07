@@ -9,6 +9,8 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { AuthProvider, useAuth } from "@/lib/auth";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -113,7 +115,27 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <AuthProvider>
+        <AuthGate />
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
+}
+
+function AuthGate() {
+  const { loading, session } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-background text-sm text-muted-foreground">
+        Loading secure session…
+      </div>
+    );
+  }
+  // Allow /auth route through unauthenticated; otherwise show outlet
+  if (!session && typeof window !== "undefined" && !window.location.pathname.startsWith("/auth")) {
+    window.location.replace("/auth");
+    return null;
+  }
+  return <Outlet />;
 }
