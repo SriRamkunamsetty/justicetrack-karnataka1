@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { runExtraction } from "@/functions/extract.functions";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/upload")({ component: UploadPage });
 
@@ -29,6 +30,7 @@ const steps = [
 function UploadPage() {
   const { user, canWrite, profile } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [stage, setStage] = useState(-1);
   const [fileName, setFileName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -46,27 +48,43 @@ function UploadPage() {
     setStage(0);
 
     try {
-      // 1. Insert case row
+      const session = await supabase.auth.getSession();
+      if (!session.data.session) throw new Error("Session expired. Please sign in again and retry upload.");
+
+      // 1. Upload PDF to secure storage using a client-generated case id.
+      const caseId = crypto.randomUUID();
+      const path = `${user.id}/${caseId}/${file.name}`;
+      const { error: upErr } = await supabase.storage
+        .from("judgments")
+        .upload(path, file, { upsert: true, contentType: "application/pdf" });
+      if (upErr) throw new Error(`Upload failed: ${upErr.message}`);
+
+      // 2. Create the case record in one insert so every authenticated role passes RLS.
       const { data: caseRow, error: caseErr } = await supabase
         .from("cases")
         .insert({
+          id: caseId,
           pdf_name: file.name,
+          pdf_path: path,
           status: "uploaded",
           uploaded_by: user.id,
           title: file.name.replace(/\.pdf$/i, ""),
         })
         .select("id")
         .single();
-      if (caseErr || !caseRow) throw new Error(caseErr?.message ?? "Could not create case");
+      if (caseErr || !caseRow) {
+        await supabase.storage.from("judgments").remove([path]);
+        throw new Error(caseErr?.message?.includes("row-level security") ? "Unable to create case record. Upload authorization failed." : caseErr?.message ?? "Unable to create case record");
+      }
 
-      // 2. Upload PDF to storage
-      const path = `${user.id}/${caseRow.id}/${file.name}`;
-      const { error: upErr } = await supabase.storage
-        .from("judgments")
-        .upload(path, file, { upsert: true, contentType: "application/pdf" });
-      if (upErr) throw new Error(`Upload failed: ${upErr.message}`);
-
-      await supabase.from("cases").update({ pdf_path: path }).eq("id", caseRow.id);
+      await supabase.from("uploads").insert({
+        case_id: caseRow.id,
+        file_name: file.name,
+        file_path: path,
+        file_size: file.size,
+        uploaded_by: user.id,
+        status: "stored",
+      });
       await supabase.from("audit_logs").insert({
         case_id: caseRow.id,
         actor_id: user.id,
@@ -81,14 +99,19 @@ function UploadPage() {
       setStage(2);
       await runExtraction({ data: { caseId: caseRow.id, pdfPath: path } });
       setStage(3);
+      await queryClient.invalidateQueries({ queryKey: ["cases"] });
+      await queryClient.invalidateQueries({ queryKey: ["directives"] });
       setStage(4);
 
       toast.success("Extraction complete. Open verification workspace.");
       setTimeout(() => navigate({ to: "/verification/$caseId", params: { caseId: caseRow.id } }), 600);
     } catch (e: any) {
       console.error(e);
-      setError(e?.message ?? "Unknown error");
-      toast.error(e?.message ?? "Extraction failed");
+      const message = e?.message?.includes("row-level security")
+        ? "Upload authorization failed. Please refresh your session and retry."
+        : e?.message ?? "Unable to complete upload workflow";
+      setError(message);
+      toast.error(message);
     } finally {
       setBusy(false);
     }
