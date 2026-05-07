@@ -15,16 +15,33 @@ export const runExtraction = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ caseId: z.string().uuid(), pdfPath: z.string() }).parse(d))
   .handler(async ({ data, context }) => {
     const { caseId, pdfPath } = data;
-    const userId = context.userId;
+    const { supabase, userId } = context;
+
+    const { data: caseRow, error: caseError } = await supabase
+      .from("cases")
+      .select("id, pdf_path, uploaded_by")
+      .eq("id", caseId)
+      .eq("uploaded_by", userId)
+      .maybeSingle();
+
+    if (caseError) throw new Error("Upload authorization failed. Please sign in again and retry.");
+    if (!caseRow || caseRow.pdf_path !== pdfPath) {
+      throw new Error("Upload authorization failed. This judgment is not linked to your session.");
+    }
 
     await setCaseExtracting(caseId);
-    const bytes = await downloadJudgmentPdf(pdfPath);
-    const { text, pages } = await extractPdfText(bytes);
+    try {
+      const bytes = await downloadJudgmentPdf(pdfPath);
+      const { text, pages } = await extractPdfText(bytes);
 
-    const result = await callGemini(text);
-    await persistExtraction(caseId, result, pages, text, userId);
+      const result = await callGemini(text);
+      await persistExtraction(caseId, result, pages, text, userId);
 
-    return { ok: true, caseId };
+      return { ok: true, caseId };
+    } catch (error: any) {
+      await supabase.from("uploads").update({ status: "extraction_failed", error_message: error?.message ?? "Extraction failed" }).eq("case_id", caseId);
+      throw new Error(error?.message ?? "Unable to complete extraction workflow. Please retry.");
+    }
   });
 
 export const decideField = createServerFn({ method: "POST" })
