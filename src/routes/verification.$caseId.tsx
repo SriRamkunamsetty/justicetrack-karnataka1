@@ -17,9 +17,11 @@ export const Route = createFileRoute("/verification/$caseId")({ component: Verif
 
 function VerificationWorkspace() {
   const { caseId } = Route.useParams();
-  const { canWrite } = useAuth();
+  const { hasAnyRole } = useAuth();
   const qc = useQueryClient();
   const { data, isLoading } = useCase(caseId);
+  const canVerify = hasAnyRole(["super_admin", "legal_officer", "reviewing_officer"]);
+  const canPublish = hasAnyRole(["super_admin", "legal_officer"]);
 
   const c = data?.case;
   const fields = data?.fields ?? [];
@@ -57,7 +59,7 @@ function VerificationWorkspace() {
   const refresh = () => qc.invalidateQueries({ queryKey: ["case", caseId] });
 
   const onApprove = async (fid: string) => {
-    if (!canWrite) return toast.error("You don't have permission.");
+    if (!canVerify) return toast.error("Verification authorization failed. Your role can upload and view, but cannot verify fields.");
     setBusy(fid);
     try {
       await decideField({ data: { fieldId: fid, decision: "approved" } });
@@ -71,7 +73,7 @@ function VerificationWorkspace() {
   };
 
   const onSaveEdit = async (fid: string) => {
-    if (!canWrite) return toast.error("You don't have permission.");
+    if (!canVerify) return toast.error("Verification authorization failed. Your role can upload and view, but cannot verify fields.");
     setBusy(fid);
     try {
       await decideField({ data: { fieldId: fid, decision: "edited", editedValue: editValue } });
@@ -102,7 +104,7 @@ function VerificationWorkspace() {
   };
 
   const onPublish = async () => {
-    if (!canWrite) return toast.error("You don't have permission.");
+    if (!canPublish) return toast.error("Publication authorization failed. Only authorised legal officers can publish verified records.");
     const undecided = fields.filter((f) => f.decision === "pending");
     if (undecided.length > 0) {
       if (!confirm(`${undecided.length} field(s) still pending. Publish anyway?`)) return;
@@ -164,7 +166,7 @@ function VerificationWorkspace() {
             </span>
             <button
               onClick={onPublish}
-              disabled={!canWrite || publishing || c.status === "verified"}
+              disabled={!canPublish || publishing || c.status === "verified"}
               className="bg-success text-white text-sm font-semibold px-4 h-10 rounded inline-flex items-center gap-1.5 disabled:opacity-50"
             >
               {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
