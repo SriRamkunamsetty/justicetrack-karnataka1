@@ -21,25 +21,36 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-
-const main = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/upload", label: "Upload Judgment", icon: Upload },
-  { to: "/verification", label: "Verification Workspace", icon: ShieldCheck, badge: "4" },
-  { to: "/action-plans", label: "Action Plans", icon: ListChecks, badge: "12" },
-  { to: "/cases", label: "Case Repository", icon: FolderOpen },
-  { to: "/audit", label: "Audit Logs", icon: ScrollText },
-];
-
-const admin = [
-  { to: "/users", label: "Users & Roles", icon: Users },
-  { to: "/settings", label: "Settings", icon: Settings },
-  { to: "/help", label: "Help & Manual", icon: HelpCircle },
-];
+import { useCases, useDirectives } from "@/lib/queries";
+import { useAuth } from "@/lib/auth";
 
 export function AppSidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const active = (p: string) => (p === "/" ? path === "/" : path.startsWith(p));
+  const { data: cases = [] } = useCases();
+  const { data: directives = [] } = useDirectives();
+  const { hasAnyRole } = useAuth();
+  const isAdmin = hasAnyRole(["super_admin"]);
+
+  const verifyCount = cases.filter(
+    (c) => c.status === "pending" || c.status === "in_review",
+  ).length;
+  const openDirectives = directives.filter((d: any) => d.status !== "acknowledged").length;
+
+  const main: { to: string; label: string; icon: any; badge?: number }[] = [
+    { to: "/", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/upload", label: "Upload Judgment", icon: Upload },
+    { to: "/verification", label: "Verification Workspace", icon: ShieldCheck, badge: verifyCount },
+    { to: "/action-plans", label: "Action Plans", icon: ListChecks, badge: openDirectives },
+    { to: "/cases", label: "Case Repository", icon: FolderOpen },
+    { to: "/audit", label: "Audit Logs", icon: ScrollText },
+  ];
+
+  const admin = [
+    ...(isAdmin ? [{ to: "/users", label: "Users & Roles", icon: Users }] : []),
+    { to: "/settings", label: "Settings", icon: Settings },
+    { to: "/help", label: "Help & Manual", icon: HelpCircle },
+  ];
 
   return (
     <Sidebar collapsible="icon">
@@ -68,9 +79,7 @@ export function AppSidebar() {
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/60">
-            Operations
-          </SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground/60">Operations</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {main.map((item) => (
@@ -83,11 +92,11 @@ export function AppSidebar() {
                     <Link to={item.to} className="flex items-center gap-2">
                       <item.icon className="h-4 w-4" />
                       <span className="flex-1">{item.label}</span>
-                      {item.badge && (
+                      {item.badge && item.badge > 0 ? (
                         <span className="text-[10px] font-semibold bg-[var(--gov-red)] text-white rounded-full px-1.5 py-0.5">
                           {item.badge}
                         </span>
-                      )}
+                      ) : null}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -97,9 +106,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/60">
-            Administration
-          </SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground/60">Administration</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {admin.map((item) => (
@@ -117,8 +124,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="bg-sidebar text-sidebar-foreground/70 text-[10px] px-3 py-3 border-t border-sidebar-border">
-        <div>v 2.4.1 · Build 20250428</div>
-        <div>© NIC Karnataka · Last sync 09:42</div>
+        <div>v 2.4.1 · NIC Karnataka</div>
       </SidebarFooter>
     </Sidebar>
   );
