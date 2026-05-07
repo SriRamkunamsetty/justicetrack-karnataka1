@@ -13,6 +13,7 @@ import { Route as UsersRouteImport } from './routes/users'
 import { Route as UploadRouteImport } from './routes/upload'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as HelpRouteImport } from './routes/help'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuditRouteImport } from './routes/audit'
 import { Route as ActionPlansRouteImport } from './routes/action-plans'
 import { Route as IndexRouteImport } from './routes/index'
@@ -39,6 +40,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const HelpRoute = HelpRouteImport.update({
   id: '/help',
   path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuditRoute = AuditRouteImport.update({
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/action-plans': typeof ActionPlansRoute
   '/audit': typeof AuditRoute
+  '/auth': typeof AuthRoute
   '/help': typeof HelpRoute
   '/settings': typeof SettingsRoute
   '/upload': typeof UploadRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/action-plans': typeof ActionPlansRoute
   '/audit': typeof AuditRoute
+  '/auth': typeof AuthRoute
   '/help': typeof HelpRoute
   '/settings': typeof SettingsRoute
   '/upload': typeof UploadRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/action-plans': typeof ActionPlansRoute
   '/audit': typeof AuditRoute
+  '/auth': typeof AuthRoute
   '/help': typeof HelpRoute
   '/settings': typeof SettingsRoute
   '/upload': typeof UploadRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/'
     | '/action-plans'
     | '/audit'
+    | '/auth'
     | '/help'
     | '/settings'
     | '/upload'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/'
     | '/action-plans'
     | '/audit'
+    | '/auth'
     | '/help'
     | '/settings'
     | '/upload'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/'
     | '/action-plans'
     | '/audit'
+    | '/auth'
     | '/help'
     | '/settings'
     | '/upload'
@@ -163,6 +175,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActionPlansRoute: typeof ActionPlansRoute
   AuditRoute: typeof AuditRoute
+  AuthRoute: typeof AuthRoute
   HelpRoute: typeof HelpRoute
   SettingsRoute: typeof SettingsRoute
   UploadRoute: typeof UploadRoute
@@ -201,6 +214,13 @@ declare module '@tanstack/react-router' {
       path: '/help'
       fullPath: '/help'
       preLoaderRoute: typeof HelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/audit': {
@@ -259,6 +279,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActionPlansRoute: ActionPlansRoute,
   AuditRoute: AuditRoute,
+  AuthRoute: AuthRoute,
   HelpRoute: HelpRoute,
   SettingsRoute: SettingsRoute,
   UploadRoute: UploadRoute,
