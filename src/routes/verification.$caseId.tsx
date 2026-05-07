@@ -341,6 +341,11 @@ function VerificationWorkspace() {
                           </div>
                         )}
 
+                        {f.decision === "rejected" && f.rejection_reason && !isRejecting && (
+                          <div className="mt-2 text-[11px] text-[var(--gov-red)] border-l-2 border-[var(--gov-red)] pl-2 italic">
+                            Rejected: {f.rejection_reason}
+                          </div>
+                        )}
                         {!isEditing && !isRejecting && (
                           <div className="mt-2 flex items-center gap-1">
                             <button
