@@ -17,14 +17,8 @@ export const runExtraction = createServerFn({ method: "POST" })
     const { caseId, pdfPath } = data;
     const userId = context.userId;
 
-    await supabaseAdmin.from("cases").update({ status: "extracting" }).eq("id", caseId);
-
-    const { data: file, error: dlErr } = await supabaseAdmin.storage
-      .from("judgments")
-      .download(pdfPath);
-    if (dlErr || !file) throw new Error(`Download failed: ${dlErr?.message ?? "no file"}`);
-
-    const bytes = new Uint8Array(await file.arrayBuffer());
+    await setCaseExtracting(caseId);
+    const bytes = await downloadJudgmentPdf(pdfPath);
     const { text, pages } = await extractPdfText(bytes);
 
     const result = await callGemini(text);
