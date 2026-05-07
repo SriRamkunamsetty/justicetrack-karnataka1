@@ -44,12 +44,26 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarContent className="bg-sidebar text-sidebar-foreground">
-        <div className="px-3 pt-4 pb-3 border-b border-sidebar-border">
-          <div className="text-[10px] tracking-[0.16em] uppercase text-sidebar-foreground/60">
-            Government of Karnataka
+        <div className="px-4 pt-5 pb-4 border-b border-sidebar-border">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-[var(--sandal)] text-[var(--gov-blue-deep)] grid place-items-center font-serif text-lg ring-2 ring-[var(--gov-red)]/40 shrink-0">
+              ⚖
+            </div>
+            <div className="leading-tight min-w-0">
+              <div className="text-[9px] tracking-[0.18em] uppercase text-sidebar-foreground/60">
+                Government of Karnataka
+              </div>
+              <div className="font-serif text-base text-sidebar-foreground font-semibold">
+                JusticeTrack CCMS
+              </div>
+            </div>
           </div>
-          <div className="font-serif text-base text-sidebar-foreground font-semibold mt-0.5">
-            JusticeTrack CCMS
+          <div className="text-[9px] tracking-wider uppercase text-sidebar-foreground/50 mt-2.5">
+            Dept. of Personnel & Administrative Reforms
+          </div>
+          <div className="mt-2.5 flex items-center gap-1.5 text-[9px]">
+            <span className="px-1.5 py-0.5 rounded bg-success/20 text-success font-semibold">NIC SECURE</span>
+            <span className="px-1.5 py-0.5 rounded bg-[var(--gov-red)]/20 text-[var(--sandal)] font-semibold">GIGW 3.0</span>
           </div>
         </div>
 

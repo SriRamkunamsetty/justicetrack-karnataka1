@@ -22,10 +22,10 @@ export function GovHeader() {
       </div>
 
       {/* Main header */}
-      <div className="flex items-center gap-4 px-4 h-16">
+      <div className="flex items-center gap-5 px-6 h-[72px]">
         <SidebarTrigger className="md:hidden" />
         <Link to="/" className="flex items-center gap-3">
-          <div className="h-11 w-11 rounded-full bg-[var(--gov-blue)] text-white grid place-items-center font-serif text-xl shadow-sm ring-2 ring-[var(--sandal)]">
+          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[var(--gov-blue)] to-[var(--gov-blue-deep)] text-white grid place-items-center font-serif text-xl shadow-sm ring-2 ring-[var(--sandal)]">
             ⚖
           </div>
           <div className="leading-tight">
