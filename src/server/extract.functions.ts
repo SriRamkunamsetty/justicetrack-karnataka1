@@ -113,11 +113,8 @@ export const getSignedPdfUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ pdfPath: z.string() }).parse(d))
   .handler(async ({ data }) => {
-    const { data: signed, error } = await supabaseAdmin.storage
-      .from("judgments")
-      .createSignedUrl(data.pdfPath, 60 * 60);
-    if (error || !signed) throw new Error(error?.message ?? "Could not sign URL");
-    return { url: signed.signedUrl };
+    const url = await signJudgmentUrl(data.pdfPath);
+    return { url };
   });
 
 export const acknowledgeDirective = createServerFn({ method: "POST" })
