@@ -8,7 +8,7 @@ import {
   setCaseExtracting,
   downloadJudgmentPdf,
   signJudgmentUrl,
-} from "./extract.server";
+} from "@/server/extract.server";
 
 export const runExtraction = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
