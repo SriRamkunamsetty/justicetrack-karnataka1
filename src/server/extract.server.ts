@@ -6,6 +6,18 @@ export async function setCaseExtracting(caseId: string) {
   await supabaseAdmin.from("cases").update({ status: "extracting" }).eq("id", caseId);
 }
 
+export async function markExtractionFailed(caseId: string, actorId: string, message: string) {
+  await supabaseAdmin.from("cases").update({ status: "rejected" }).eq("id", caseId);
+  await supabaseAdmin.from("audit_logs").insert({
+    case_id: caseId,
+    actor_id: actorId,
+    actor_name: "JusticeTrack AI",
+    actor_role: "system",
+    action: "Extraction workflow failed",
+    details: { error: message },
+  });
+}
+
 export async function downloadJudgmentPdf(pdfPath: string): Promise<Uint8Array> {
   const { data: file, error } = await supabaseAdmin.storage.from("judgments").download(pdfPath);
   if (error || !file) throw new Error(`Download failed: ${error?.message ?? "no file"}`);
@@ -198,7 +210,61 @@ export async function persistExtraction(
     );
   }
   if (result.directives.length) {
-    await supabaseAdmin.from("directives").insert(
+    const directives = result.directives.map((d) => ({
+      case_id: caseId,
+      text: d.text,
+      department: d.department,
+      deadline: d.deadline,
+      priority: d.priority,
+      source_page: d.source_page,
+      source_quote: d.source_quote,
+    }));
+    const { data: insertedDirectives } = await supabaseAdmin.from("directives").insert(directives).select("id, text, department, deadline, priority");
+
+    if (insertedDirectives?.length) {
+      await supabaseAdmin.from("action_plans").insert(
+        insertedDirectives.map((d) => ({
+          case_id: caseId,
+          directive_id: d.id,
+          department: d.department,
+          action_text: d.text,
+          priority: d.priority,
+          due_date: d.deadline,
+          created_by: actorId,
+        })),
+      );
+    }
+  }
+
+  await supabaseAdmin.from("workflow_assignments").insert({
+    case_id: caseId,
+    department: result.department,
+    assigned_role: "reviewing_officer",
+    status: "pending_verification",
+    created_by: actorId,
+  });
+
+  await supabaseAdmin.from("uploads").update({ status: "extracted", error_message: null }).eq("case_id", caseId);
+  await supabaseAdmin.from("notifications").insert({
+    user_id: actorId,
+    case_id: caseId,
+    message: "Judgment extraction completed. Verification workspace is ready.",
+  });
+
+  await supabaseAdmin.from("audit_logs").insert({
+    case_id: caseId,
+    actor_id: actorId,
+    actor_name: "JusticeTrack AI",
+    actor_role: "system",
+    action: "Extraction completed and routed for verification",
+    details: {
+      avg_confidence: avgConf,
+      field_count: result.fields.length,
+      directive_count: result.directives.length,
+      workflow: "pending_verification",
+    },
+  });
+}
       result.directives.map((d) => ({
         case_id: caseId,
         text: d.text,
