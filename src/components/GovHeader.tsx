@@ -1,11 +1,32 @@
-import { Link } from "@tanstack/react-router";
-import { Bell, Search, ShieldCheck, ChevronDown } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Bell, Search, ShieldCheck, ChevronDown, LogOut, User as UserIcon, Settings as SettingsIcon } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useAuth, ROLE_LABEL } from "@/lib/auth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+function initials(name: string | null | undefined, email: string | null | undefined) {
+  const src = (name?.trim() || email?.split("@")[0] || "").trim();
+  if (!src) return "··";
+  const parts = src.split(/\s+/);
+  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || src.slice(0, 2).toUpperCase();
+}
 
 export function GovHeader() {
+  const { profile, user, roles, signOut } = useAuth();
+  const nav = useNavigate();
+  const name = profile?.full_name?.trim() || user?.email?.split("@")[0] || "Officer";
+  const role = roles[0] ? ROLE_LABEL[roles[0]] : "Read-only Viewer";
+  const dept = profile?.department || profile?.designation || "Unassigned Department";
+
   return (
     <header className="sticky top-0 z-30 bg-card border-b border-border">
-      {/* Top utility strip */}
       <div className="bg-[var(--gov-blue-deep)] text-white text-xs">
         <div className="flex items-center justify-between px-6 h-8">
           <div className="flex items-center gap-4">
@@ -21,7 +42,6 @@ export function GovHeader() {
         </div>
       </div>
 
-      {/* Main header */}
       <div className="flex items-center gap-6 px-8 h-[84px]">
         <SidebarTrigger className="md:hidden" />
         <Link to="/" className="flex items-center gap-4">
@@ -61,20 +81,46 @@ export function GovHeader() {
           </div>
           <button className="relative h-10 w-10 grid place-items-center rounded-full hover:bg-muted transition" aria-label="Notifications">
             <Bell className="h-4 w-4" />
-            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-[var(--gov-red)] ring-2 ring-card" />
           </button>
-          <div className="flex items-center gap-3 pl-5 border-l border-border">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[var(--gov-blue)] to-[var(--gov-blue-deep)] text-white grid place-items-center text-xs font-semibold shadow-sm">
-              MG
-            </div>
-            <div className="hidden md:block leading-tight text-right">
-              <div className="text-sm font-semibold">Mahesh Gowda</div>
-              <div className="text-[11px] text-muted-foreground">
-                Legal Officer · Revenue Dept.
-              </div>
-            </div>
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-3 pl-5 border-l border-border outline-none">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[var(--gov-blue)] to-[var(--gov-blue-deep)] text-white grid place-items-center text-xs font-semibold shadow-sm">
+                  {initials(profile?.full_name, user?.email)}
+                </div>
+                <div className="hidden md:block leading-tight text-right">
+                  <div className="text-sm font-semibold">{name}</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    {role} · {dept}
+                  </div>
+                </div>
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="text-xs">
+                <div className="font-semibold">{name}</div>
+                <div className="text-muted-foreground font-normal">{user?.email}</div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => nav({ to: "/settings" })}>
+                <UserIcon className="h-4 w-4 mr-2" /> Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => nav({ to: "/settings" })}>
+                <SettingsIcon className="h-4 w-4 mr-2" /> Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={async () => {
+                  await signOut();
+                  window.location.replace("/auth");
+                }}
+              >
+                <LogOut className="h-4 w-4 mr-2" /> Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
