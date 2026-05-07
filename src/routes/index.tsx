@@ -2,6 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { GovLayout } from "@/components/GovLayout";
 import { StatusPill, PriorityPill } from "@/components/Pills";
 import { useCases } from "@/lib/queries";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   AlertTriangle,
   CheckCircle2,
