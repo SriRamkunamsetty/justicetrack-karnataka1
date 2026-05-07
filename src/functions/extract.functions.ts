@@ -58,6 +58,11 @@ export const decideField = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const { data: permitted } = await supabase.rpc("current_user_has_any_role", {
+      _roles: ["super_admin", "legal_officer", "reviewing_officer"],
+    });
+    if (!permitted) throw new Error("Verification authorization failed. Your role can upload and view, but cannot verify fields.");
+
     const { data: field, error } = await supabase
       .from("extracted_fields")
       .update({
@@ -100,6 +105,11 @@ export const publishCase = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ caseId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const { data: permitted } = await supabase.rpc("current_user_has_any_role", {
+      _roles: ["super_admin", "legal_officer"],
+    });
+    if (!permitted) throw new Error("Publication authorization failed. Only authorised legal officers can publish verified records.");
+
     const { error } = await supabase
       .from("cases")
       .update({
@@ -139,6 +149,11 @@ export const acknowledgeDirective = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ directiveId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const { data: permitted } = await supabase.rpc("current_user_has_any_role", {
+      _roles: ["super_admin", "legal_officer", "reviewing_officer", "department_admin"],
+    });
+    if (!permitted) throw new Error("Workflow authorization failed. Your role can upload and view, but cannot acknowledge directives.");
+
     const { data: dir, error } = await supabase
       .from("directives")
       .update({
