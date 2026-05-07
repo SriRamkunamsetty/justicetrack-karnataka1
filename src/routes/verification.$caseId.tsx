@@ -351,7 +351,7 @@ function VerificationWorkspace() {
                         {!isEditing && !isRejecting && (
                           <div className="mt-2 flex items-center gap-1">
                             <button
-                              disabled={!canWrite || busy === f.id}
+                              disabled={!canVerify || busy === f.id}
                               onClick={(e) => { e.stopPropagation(); onApprove(f.id); }}
                               className={`text-xs px-2 h-7 rounded inline-flex items-center gap-1 border disabled:opacity-50 ${
                                 f.decision === "approved" ? "bg-success text-white border-success" : "border-border hover:bg-success/10"
@@ -360,7 +360,7 @@ function VerificationWorkspace() {
                               {busy === f.id && f.decision !== "approved" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />} Approve
                             </button>
                             <button
-                              disabled={!canWrite}
+                              disabled={!canVerify}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setEditingId(f.id);
@@ -373,7 +373,7 @@ function VerificationWorkspace() {
                               <Edit3 className="h-3 w-3" /> Edit
                             </button>
                             <button
-                              disabled={!canWrite}
+                              disabled={!canVerify}
                               onClick={(e) => { e.stopPropagation(); setRejectingId(f.id); }}
                               className={`text-xs px-2 h-7 rounded inline-flex items-center gap-1 border disabled:opacity-50 ${
                                 f.decision === "rejected" ? "bg-[var(--gov-red)] text-white border-[var(--gov-red)]" : "border-border hover:bg-[var(--gov-red)]/10"
