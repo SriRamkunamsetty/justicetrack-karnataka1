@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { runExtraction } from "@/server/extract.functions";
+import { runExtraction } from "@/functions/extract.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/upload")({ component: UploadPage });

@@ -6,7 +6,7 @@ import { Calendar, Building2, AlertTriangle, CheckCircle2, Loader2 } from "lucid
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useQueryClient } from "@tanstack/react-query";
-import { acknowledgeDirective } from "@/server/extract.functions";
+import { acknowledgeDirective } from "@/functions/extract.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/action-plans")({ component: ActionPlans });
