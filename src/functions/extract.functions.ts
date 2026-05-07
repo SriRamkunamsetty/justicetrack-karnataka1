@@ -6,6 +6,7 @@ import {
   callGemini,
   persistExtraction,
   setCaseExtracting,
+  markExtractionFailed,
   downloadJudgmentPdf,
   signJudgmentUrl,
 } from "@/server/extract.server";
@@ -40,6 +41,7 @@ export const runExtraction = createServerFn({ method: "POST" })
       return { ok: true, caseId };
     } catch (error: any) {
       await supabase.from("uploads").update({ status: "extraction_failed", error_message: error?.message ?? "Extraction failed" }).eq("case_id", caseId);
+      await markExtractionFailed(caseId, userId, error?.message ?? "Extraction failed");
       throw new Error(error?.message ?? "Unable to complete extraction workflow. Please retry.");
     }
   });
