@@ -9,38 +9,214 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UsersRouteImport } from './routes/users'
+import { Route as UploadRouteImport } from './routes/upload'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as HelpRouteImport } from './routes/help'
+import { Route as AuditRouteImport } from './routes/audit'
+import { Route as ActionPlansRouteImport } from './routes/action-plans'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VerificationIndexRouteImport } from './routes/verification.index'
+import { Route as CasesIndexRouteImport } from './routes/cases.index'
+import { Route as VerificationCaseIdRouteImport } from './routes/verification.$caseId'
+import { Route as CasesCaseIdRouteImport } from './routes/cases.$caseId'
 
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UploadRoute = UploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuditRoute = AuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActionPlansRoute = ActionPlansRouteImport.update({
+  id: '/action-plans',
+  path: '/action-plans',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VerificationIndexRoute = VerificationIndexRouteImport.update({
+  id: '/verification/',
+  path: '/verification/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CasesIndexRoute = CasesIndexRouteImport.update({
+  id: '/cases/',
+  path: '/cases/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerificationCaseIdRoute = VerificationCaseIdRouteImport.update({
+  id: '/verification/$caseId',
+  path: '/verification/$caseId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CasesCaseIdRoute = CasesCaseIdRouteImport.update({
+  id: '/cases/$caseId',
+  path: '/cases/$caseId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/action-plans': typeof ActionPlansRoute
+  '/audit': typeof AuditRoute
+  '/help': typeof HelpRoute
+  '/settings': typeof SettingsRoute
+  '/upload': typeof UploadRoute
+  '/users': typeof UsersRoute
+  '/cases/$caseId': typeof CasesCaseIdRoute
+  '/verification/$caseId': typeof VerificationCaseIdRoute
+  '/cases/': typeof CasesIndexRoute
+  '/verification/': typeof VerificationIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/action-plans': typeof ActionPlansRoute
+  '/audit': typeof AuditRoute
+  '/help': typeof HelpRoute
+  '/settings': typeof SettingsRoute
+  '/upload': typeof UploadRoute
+  '/users': typeof UsersRoute
+  '/cases/$caseId': typeof CasesCaseIdRoute
+  '/verification/$caseId': typeof VerificationCaseIdRoute
+  '/cases': typeof CasesIndexRoute
+  '/verification': typeof VerificationIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/action-plans': typeof ActionPlansRoute
+  '/audit': typeof AuditRoute
+  '/help': typeof HelpRoute
+  '/settings': typeof SettingsRoute
+  '/upload': typeof UploadRoute
+  '/users': typeof UsersRoute
+  '/cases/$caseId': typeof CasesCaseIdRoute
+  '/verification/$caseId': typeof VerificationCaseIdRoute
+  '/cases/': typeof CasesIndexRoute
+  '/verification/': typeof VerificationIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/action-plans'
+    | '/audit'
+    | '/help'
+    | '/settings'
+    | '/upload'
+    | '/users'
+    | '/cases/$caseId'
+    | '/verification/$caseId'
+    | '/cases/'
+    | '/verification/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/action-plans'
+    | '/audit'
+    | '/help'
+    | '/settings'
+    | '/upload'
+    | '/users'
+    | '/cases/$caseId'
+    | '/verification/$caseId'
+    | '/cases'
+    | '/verification'
+  id:
+    | '__root__'
+    | '/'
+    | '/action-plans'
+    | '/audit'
+    | '/help'
+    | '/settings'
+    | '/upload'
+    | '/users'
+    | '/cases/$caseId'
+    | '/verification/$caseId'
+    | '/cases/'
+    | '/verification/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ActionPlansRoute: typeof ActionPlansRoute
+  AuditRoute: typeof AuditRoute
+  HelpRoute: typeof HelpRoute
+  SettingsRoute: typeof SettingsRoute
+  UploadRoute: typeof UploadRoute
+  UsersRoute: typeof UsersRoute
+  CasesCaseIdRoute: typeof CasesCaseIdRoute
+  VerificationCaseIdRoute: typeof VerificationCaseIdRoute
+  CasesIndexRoute: typeof CasesIndexRoute
+  VerificationIndexRoute: typeof VerificationIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/upload': {
+      id: '/upload'
+      path: '/upload'
+      fullPath: '/upload'
+      preLoaderRoute: typeof UploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/audit': {
+      id: '/audit'
+      path: '/audit'
+      fullPath: '/audit'
+      preLoaderRoute: typeof AuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/action-plans': {
+      id: '/action-plans'
+      path: '/action-plans'
+      fullPath: '/action-plans'
+      preLoaderRoute: typeof ActionPlansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +224,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/verification/': {
+      id: '/verification/'
+      path: '/verification'
+      fullPath: '/verification/'
+      preLoaderRoute: typeof VerificationIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cases/': {
+      id: '/cases/'
+      path: '/cases'
+      fullPath: '/cases/'
+      preLoaderRoute: typeof CasesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verification/$caseId': {
+      id: '/verification/$caseId'
+      path: '/verification/$caseId'
+      fullPath: '/verification/$caseId'
+      preLoaderRoute: typeof VerificationCaseIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cases/$caseId': {
+      id: '/cases/$caseId'
+      path: '/cases/$caseId'
+      fullPath: '/cases/$caseId'
+      preLoaderRoute: typeof CasesCaseIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ActionPlansRoute: ActionPlansRoute,
+  AuditRoute: AuditRoute,
+  HelpRoute: HelpRoute,
+  SettingsRoute: SettingsRoute,
+  UploadRoute: UploadRoute,
+  UsersRoute: UsersRoute,
+  CasesCaseIdRoute: CasesCaseIdRoute,
+  VerificationCaseIdRoute: VerificationCaseIdRoute,
+  CasesIndexRoute: CasesIndexRoute,
+  VerificationIndexRoute: VerificationIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
