@@ -14,6 +14,7 @@ export interface Profile {
   full_name: string;
   designation: string | null;
   department: string | null;
+  district: string | null;
   email: string | null;
 }
 

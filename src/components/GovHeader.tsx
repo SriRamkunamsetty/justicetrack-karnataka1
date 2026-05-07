@@ -23,7 +23,8 @@ export function GovHeader() {
   const nav = useNavigate();
   const name = profile?.full_name?.trim() || user?.email?.split("@")[0] || "Officer";
   const role = roles[0] ? ROLE_LABEL[roles[0]] : "Read-only Viewer";
-  const dept = profile?.department || profile?.designation || "Unassigned Department";
+  const dept = profile?.department || "Unassigned Department";
+  const district = profile?.district;
 
   return (
     <header className="sticky top-0 z-30 bg-card border-b border-border">
@@ -92,7 +93,7 @@ export function GovHeader() {
                 <div className="hidden md:block leading-tight text-right">
                   <div className="text-sm font-semibold">{name}</div>
                   <div className="text-[11px] text-muted-foreground">
-                    {role} · {dept}
+                    {role} · {dept}{district ? ` · ${district}` : ""}
                   </div>
                 </div>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
