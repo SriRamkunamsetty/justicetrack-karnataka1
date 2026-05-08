@@ -1,7 +1,20 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "tanstack-start-app",
+  "name": "justicetrack",
   "compatibility_date": "2025-09-24",
   "compatibility_flags": ["nodejs_compat"],
   "main": "src/server.ts",
+  "observability": { "enabled": true },
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+  "vars": {
+    "VITE_SUPABASE_URL": "https://pcrdwacdnsvivjbzviwl.supabase.co",
+    "VITE_SUPABASE_PROJECT_ID": "pcrdwacdnsvivjbzviwl",
+    "VITE_SUPABASE_PUBLISHABLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjcmR3YWNkbnN2aXZqYnp2aXdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzI3MTUsImV4cCI6MjA5Mzc0ODcxNX0.gF2pnIb9pbo2TA-2j0TTZgvoKxBZF5W1nAmVw4Hqmi0",
+    "SUPABASE_URL": "https://pcrdwacdnsvivjbzviwl.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjcmR3YWNkbnN2aXZqYnp2aXdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzI3MTUsImV4cCI6MjA5Mzc0ODcxNX0.gF2pnIb9pbo2TA-2j0TTZgvoKxBZF5W1nAmVw4Hqmi0"
+  }
 }
