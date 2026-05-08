@@ -8,7 +8,8 @@ import {
   ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Loader2, Save,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { decideField, publishCase, getSignedPdfUrl } from "@/functions/extract.functions";
+import { decideField, publishCase } from "@/functions/extract.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,9 +43,22 @@ function VerificationWorkspace() {
 
   useEffect(() => {
     if (!c?.pdf_path) return;
-    getSignedPdfUrl({ data: { pdfPath: c.pdf_path } })
-      .then((r) => setPdfUrl(r.url))
-      .catch((e) => console.error("Signed URL error", e));
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .storage
+        .from("judgments")
+        .createSignedUrl(c.pdf_path, 3600);
+      if (cancelled) return;
+      if (error || !data?.signedUrl) {
+        console.error("Signed URL error", error);
+        return;
+      }
+      setPdfUrl(data.signedUrl);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [c?.pdf_path]);
 
   const activeField = useMemo(
