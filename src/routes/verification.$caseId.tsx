@@ -12,7 +12,6 @@ import { decideField, publishCase } from "@/functions/extract.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/verification/$caseId")({ component: VerificationWorkspace });
 
@@ -48,7 +47,7 @@ function VerificationWorkspace() {
       const { data, error } = await supabase
         .storage
         .from("judgments")
-        .createSignedUrl(c.pdf_path, 3600);
+        .createSignedUrl(c.pdf_path as string, 3600);
       if (cancelled) return;
       if (error || !data?.signedUrl) {
         console.error("Signed URL error", error);
