@@ -37,7 +37,8 @@ function VerificationWorkspace() {
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfPage, setPdfPage] = useState(1);
-  const [pdfZoom, setPdfZoom] = useState(100);
+  // null = fit-to-width (default). Number = explicit zoom percentage.
+  const [pdfZoom, setPdfZoom] = useState<number | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
 
   useEffect(() => {
@@ -214,11 +215,17 @@ function VerificationWorkspace() {
                   <ChevronRight className="h-3.5 w-3.5" />
                 </button>
                 <span className="mx-1 h-4 w-px bg-border" />
-                <button onClick={() => setPdfZoom((z) => Math.max(50, z - 10))} className="h-7 w-7 grid place-items-center rounded hover:bg-muted" title="Zoom out">
+                <button onClick={() => setPdfZoom((z) => Math.max(50, (z ?? 100) - 10))} className="h-7 w-7 grid place-items-center rounded hover:bg-muted" title="Zoom out">
                   <ZoomOut className="h-3.5 w-3.5" />
                 </button>
-                <span className="text-xs font-mono px-1 min-w-[40px] text-center">{pdfZoom}%</span>
-                <button onClick={() => setPdfZoom((z) => Math.min(200, z + 10))} className="h-7 w-7 grid place-items-center rounded hover:bg-muted" title="Zoom in">
+                <button
+                  onClick={() => setPdfZoom(null)}
+                  className="text-xs font-mono px-1 min-w-[44px] text-center hover:bg-muted rounded h-7"
+                  title="Reset to fit width"
+                >
+                  {pdfZoom == null ? "Fit" : `${pdfZoom}%`}
+                </button>
+                <button onClick={() => setPdfZoom((z) => Math.min(200, (z ?? 100) + 10))} className="h-7 w-7 grid place-items-center rounded hover:bg-muted" title="Zoom in">
                   <ZoomIn className="h-3.5 w-3.5" />
                 </button>
                 <span className="mx-1 h-4 w-px bg-border" />
@@ -227,12 +234,12 @@ function VerificationWorkspace() {
                 </button>
               </div>
             </div>
-            <div className="bg-[#525659] flex-1" style={{ height: fullscreen ? "calc(100vh - 240px)" : "780px" }}>
+            <div className="bg-[#525659] flex-1 overflow-hidden" style={{ height: fullscreen ? "calc(100vh - 240px)" : "780px" }}>
               {pdfUrl ? (
                 <iframe
                   key={`${pdfPage}-${pdfZoom}`}
                   title="Judgment PDF"
-                  src={`${pdfUrl}#page=${pdfPage}&zoom=${pdfZoom}`}
+                  src={`${pdfUrl}#page=${pdfPage}&${pdfZoom == null ? "view=FitH" : `zoom=${pdfZoom}`}&toolbar=1&navpanes=0`}
                   className="w-full h-full border-0"
                 />
               ) : (
