@@ -5,11 +5,6 @@
   "compatibility_flags": ["nodejs_compat"],
   "main": "src/server.ts",
   "observability": { "enabled": true },
-  "assets": {
-    "directory": "./dist/client",
-    "binding": "ASSETS",
-    "not_found_handling": "single-page-application"
-  },
   "vars": {
     "VITE_SUPABASE_URL": "https://pcrdwacdnsvivjbzviwl.supabase.co",
     "VITE_SUPABASE_PROJECT_ID": "pcrdwacdnsvivjbzviwl",
